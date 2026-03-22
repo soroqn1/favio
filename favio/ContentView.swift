@@ -1,24 +1,33 @@
-//
-//  ContentView.swift
-//  favio
-//
-//  Created by Yaroslav Sorochan on 22.03.2026.
-//
-
 import SwiftUI
+import WebKit
 
-struct ContentView: View {
-    var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
-        }
-        .padding()
+struct WebView: NSViewRepresentable {
+    let url: URL
+
+    func makeNSView(context: Context) -> WKWebView {
+        return WKWebView()
+    }
+
+    func updateNSView(_ webView: WKWebView, context: Context) {
+        webView.load(URLRequest(url: url))
     }
 }
 
-#Preview {
-    ContentView()
+struct ContentView: View {
+    @State private var urlString = "https://google.com"
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack {
+                TextField("Search or enter URL", text: $urlString)
+                    .textFieldStyle(.roundedBorder)
+                    .onSubmit {
+                    }
+            }
+            .padding(8)
+            .background(.ultraThinMaterial)
+
+            WebView(url: URL(string: urlString) ?? URL(string: "https://google.com")!)
+        }
+    }
 }
