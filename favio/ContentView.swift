@@ -1,33 +1,37 @@
 import SwiftUI
 import WebKit
 
-struct WebView: NSViewRepresentable {
-    let url: URL
-
-    func makeNSView(context: Context) -> WKWebView {
-        return WKWebView()
-    }
-
-    func updateNSView(_ webView: WKWebView, context: Context) {
-        webView.load(URLRequest(url: url))
-    }
-}
-
 struct ContentView: View {
-    @State private var urlString = "https://google.com"
+    @StateObject private var viewModel = BrowserViewModel()
 
     var body: some View {
-        VStack(spacing: 0) {
-            HStack {
-                TextField("Search or enter URL", text: $urlString)
-                    .textFieldStyle(.roundedBorder)
-                    .onSubmit {
+        WebView(url: viewModel.currentURL, webView: viewModel.webView)
+            .navigationTitle(viewModel.pageTitle)
+            .toolbar {
+                ToolbarItemGroup(placement: .navigation) {
+                    Button(action: { viewModel.webView.goBack() }) {
+                        Image(systemName: "chevron.left")
                     }
-            }
-            .padding(8)
-            .background(.ultraThinMaterial)
+                    .disabled(!viewModel.canGoBack)
 
-            WebView(url: URL(string: urlString) ?? URL(string: "https://google.com")!)
-        }
+                    Button(action: { viewModel.webView.goForward() }) {
+                        Image(systemName: "chevron.right")
+                    }
+                    .disabled(!viewModel.canGoForward)
+
+                    Button(action: { viewModel.webView.reload() }) {
+                        Image(systemName: "arrow.clockwise")
+                    }
+                }
+
+                ToolbarItem(placement: .principal) {
+                    TextField("Search or enter address", text: $viewModel.urlString)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .frame(minWidth: 300, idealWidth: 400, maxWidth: .infinity)
+                        .onSubmit {
+                            viewModel.loadURL()
+                        }
+                }
+            }
     }
 }
